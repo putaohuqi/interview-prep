@@ -443,10 +443,21 @@ function saveCard() {
   const job = DB.getJob(currentJobId); if (!job) return
   const sec = (job.prepSections || []).find(s => s.id === addCardTargetSection); if (!sec) return
   sec.cards = sec.cards || []
-  sec.cards.push({ id: DB.newId(), question: q, answer: '' })
+  const newCard = { id: DB.newId(), question: q }
+  sec.cards.push(newCard)
   DB.saveJob(job)
   closeModal('modal-add-card')
-  renderPrepSections(job)
+
+  // Insert just the new card without re-rendering everything
+  const list = document.getElementById(`qa-list-${addCardTargetSection}`)
+  if (list) {
+    list.insertAdjacentHTML('beforeend', renderCardHTML(newCard, sec.cards.length - 1, addCardTargetSection))
+    // Update the section question count badge
+    const countEl = document.querySelector(`#sec-${addCardTargetSection} .section-count`)
+    if (countEl) countEl.textContent = `${sec.cards.length} question${sec.cards.length !== 1 ? 's' : ''}`
+  } else {
+    renderPrepSections(job)
+  }
 }
 
 // ── Delete Confirms ───────────────────────────────────────────────────────
