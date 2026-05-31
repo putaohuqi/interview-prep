@@ -60,7 +60,6 @@ function renderTrackerLinks() {
   }
   container.innerHTML = links.map(l => `
     <a class="tracker-link" href="${esc(l.url)}" target="_blank" rel="noopener">
-      <span class="tracker-link-icon">🔗</span>
       <span class="tracker-link-name">${esc(l.name)}</span>
       <span class="tracker-link-arrow">↗</span>
     </a>
@@ -149,7 +148,7 @@ function renderDashboard() {
       <div class="job-company">${esc(j.company)}</div>
       <div class="job-role">${esc(j.role)}</div>
       ${tags ? `<div class="job-tags">${tags}</div>` : ''}
-      ${qCount > 0 ? `<div class="job-prep-count">📝 ${qCount} prep question${qCount !== 1 ? 's' : ''}</div>` : ''}
+      ${qCount > 0 ? `<div class="job-prep-count">${qCount} prep question${qCount !== 1 ? 's' : ''}</div>` : ''}
       ${docPills ? `<div class="job-doc-pills">${docPills}</div>` : ''}
     </div>`
   }).join('')
@@ -218,7 +217,7 @@ function renderDocPanel(tabKey) {
       <div class="file-preview">
         <div class="file-preview-header">
           <div class="file-preview-name">
-            <span class="file-icon">${isText ? '📄' : '📕'}</span>
+            <span class="file-icon"></span>
             <span>${esc(doc.fileName || 'File')}</span>
           </div>
           <div style="display:flex;gap:4px;align-items:center">
