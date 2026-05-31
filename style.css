@@ -255,6 +255,33 @@ body {
   align-items: center;
 }
 
+.filter-chip {
+  padding: 5px 14px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: var(--shadow);
+}
+
+.filter-chip:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.filter-chip.active {
+  background: linear-gradient(135deg, var(--accent), var(--lavender));
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 2px 8px rgba(122,168,216,0.35);
+}
+
 .tag-input-wrap {
   border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);
