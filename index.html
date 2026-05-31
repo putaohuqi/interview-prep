@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interview Prep</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ── Topbar ──────────────────────────────────────────────────────────── -->
+<nav class="topbar">
+  <div class="topbar-brand" onclick="navigate('/')">
+    <div class="logo-icon"><img src="logo.png" alt="logo"></div>
+    interview prep
+  </div>
+  <span class="topbar-sep" id="topbar-sep-el" style="display:none">›</span>
+  <span class="topbar-crumb" id="topbar-crumb"></span>
+  <div class="topbar-right" id="topbar-right-dash">
+    <button class="btn btn-primary" onclick="openAddJobModal()">+ Add Job</button>
+  </div>
+  <div class="topbar-right" id="topbar-right-job" style="display:none">
+    <button class="btn btn-ghost btn-sm" onclick="openEditJobModal()">Edit</button>
+    <button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="confirmDeleteJob()">Delete</button>
+  </div>
+</nav>
+
+<!-- ── Dashboard View ──────────────────────────────────────────────────── -->
+<div class="view active" id="view-dashboard">
+  <div class="dashboard-header">
+    <div class="dashboard-title">
+      <h1>my interview prep</h1>
+      <p>you're doing great, keep going ✦</p>
+    </div>
+    <button class="btn btn-primary" onclick="openAddJobModal()">+ Add Job</button>
+  </div>
+  <div class="jobs-grid" id="jobs-grid"></div>
+</div>
+
+<!-- ── Job Detail View ─────────────────────────────────────────────────── -->
+<div class="view" id="view-job">
+  <div class="job-detail">
+
+    <!-- Document Sidebar -->
+    <aside class="doc-sidebar">
+      <div class="sidebar-header">
+        <h3>Documents</h3>
+        <div class="doc-tabs">
+          <button class="doc-tab active" data-tab="jobPosting" id="tab-job" onclick="switchDocTab('jobPosting')">Job Post</button>
+          <button class="doc-tab" data-tab="resume" id="tab-resume" onclick="switchDocTab('resume')">Resume</button>
+          <button class="doc-tab" data-tab="coverLetter" id="tab-cover" onclick="switchDocTab('coverLetter')">Cover</button>
+        </div>
+      </div>
+      <div class="doc-content">
+        <div class="doc-panel active" data-panel="jobPosting" id="panel-jobPosting"></div>
+        <div class="doc-panel" data-panel="resume" id="panel-resume"></div>
+        <div class="doc-panel" data-panel="coverLetter" id="panel-coverLetter"></div>
+      </div>
+    </aside>
+
+    <!-- Prep Main -->
+    <main class="prep-main">
+      <div class="prep-job-header">
+        <div class="prep-job-info">
+          <div class="prep-job-company" id="prep-job-company"></div>
+          <h2 id="prep-job-role"></h2>
+        </div>
+        <div class="prep-actions">
+          <button class="btn btn-secondary btn-sm" onclick="openAddSectionModal()">+ Add Section</button>
+        </div>
+      </div>
+      <div class="prep-body" id="prep-body"></div>
+    </main>
+
+  </div>
+</div>
+
+<!-- ── Modal: Add/Edit Job ─────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-job">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-job-title">Add Job</h2>
+      <button class="modal-close" onclick="closeModal('modal-job')">×</button>
+    </div>
+    <div class="modal-body">
+      <form id="job-form" onsubmit="event.preventDefault(); saveJob()">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="job-company">Company *</label>
+            <input type="text" id="job-company" placeholder="e.g. Stripe" required autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label for="job-role">Role *</label>
+            <input type="text" id="job-role" placeholder="e.g. Software Engineer" required autocomplete="off">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="job-notes">Notes</label>
+          <textarea id="job-notes" rows="3" placeholder="Recruiter name, referral, anything to remember…"></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-job')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveJob()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Add Prep Section ────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-add-section">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h2>Add Prep Section</h2>
+      <button class="modal-close" onclick="closeModal('modal-add-section')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="section-title-input">Section Title</label>
+        <input type="text" id="section-title-input" placeholder="e.g. Behavioral Questions, System Design, Technical Skills…" autocomplete="off">
+      </div>
+
+      <div style="border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+        <div style="padding:12px 16px;background:var(--bg-subtle);border-bottom:1px solid var(--border);">
+          <div style="font-size:13px;font-weight:600;margin-bottom:4px;color:var(--text)">Paste AI Content</div>
+          <div style="font-size:12px;color:var(--text-muted)">Ask an AI "give me common interview questions for [role]" and paste the response here. I'll detect and split it into individual Q&A cards.</div>
+        </div>
+        <div style="padding:12px 16px;">
+          <textarea id="section-ai-input" rows="7" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:var(--font);resize:vertical;line-height:1.6;color:var(--text);background:white;" placeholder="1. Tell me about yourself&#10;2. Why do you want to work here?&#10;3. What's your greatest strength?&#10;…"></textarea>
+          <div style="margin-top:8px;display:flex;justify-content:flex-end">
+            <button class="btn btn-secondary btn-sm" id="btn-parse" onclick="parseAIContent()">⚡ Parse into cards</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="parse-preview" id="parse-preview" style="display:none">
+        <div class="parse-preview-header">
+          <span id="parse-count"></span>
+          <span style="font-size:11px;color:var(--text-faint)">Review before saving</span>
+        </div>
+        <div id="parse-preview-list"></div>
+      </div>
+
+      <div style="font-size:12px;color:var(--text-faint);text-align:center;font-style:italic">
+        You can also skip the AI paste and add questions manually after saving.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-section')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSection()">Add Section</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Add Single Card ─────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-add-card">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Add Question</h2>
+      <button class="modal-close" onclick="closeModal('modal-add-card')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="card-question-input">Question</label>
+        <textarea id="card-question-input" rows="3" placeholder="e.g. Tell me about a time you dealt with a difficult team member."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-card')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCard()">Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Confirm Delete ──────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <h2>Confirm</h2>
+      <button class="modal-close" onclick="closeModal('modal-confirm')">×</button>
+    </div>
+    <div class="modal-body">
+      <p id="confirm-msg" style="color:var(--text-muted);font-size:14px;font-style:italic"></p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-confirm')">Cancel</button>
+      <button class="btn btn-danger" onclick="executePendingDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast container ────────────────────────────────────────────────── -->
+<div class="toast-container" id="toast-container"></div>
+
+<script src="app.js"></script>
+<script>
+  const observer = new MutationObserver(() => {
+    const onJob = document.getElementById('view-job').classList.contains('active')
+    document.getElementById('topbar-right-dash').style.display = onJob ? 'none' : 'flex'
+    document.getElementById('topbar-right-job').style.display = onJob ? 'flex' : 'none'
+    document.getElementById('topbar-sep-el').style.display = onJob ? 'inline' : 'none'
+  })
+  observer.observe(document.getElementById('view-job'), { attributes: true, attributeFilter: ['class'] })
+</script>
+</body>
+</html>
