@@ -39,12 +39,64 @@ function toast(msg, duration = 2200) {
   setTimeout(() => el.remove(), duration)
 }
 
+// ── Tracker Links ─────────────────────────────────────────────────────────
+const Links = {
+  get() { return JSON.parse(localStorage.getItem('ip_links') || '[]') },
+  save(links) { localStorage.setItem('ip_links', JSON.stringify(links)) },
+  add(name, url) {
+    const links = this.get()
+    links.push({ id: DB.newId(), name, url })
+    this.save(links)
+  },
+  remove(id) { this.save(this.get().filter(l => l.id !== id)) }
+}
+
+function renderTrackerLinks() {
+  const links = Links.get()
+  const container = document.getElementById('tracker-links')
+  if (links.length === 0) {
+    container.innerHTML = `<button class="tracker-add-btn" onclick="openAddLinkModal()">+ add tracker link</button>`
+    return
+  }
+  container.innerHTML = links.map(l => `
+    <a class="tracker-link" href="${esc(l.url)}" target="_blank" rel="noopener">
+      <span class="tracker-link-icon">🔗</span>
+      <span class="tracker-link-name">${esc(l.name)}</span>
+      <span class="tracker-link-arrow">↗</span>
+    </a>
+    <button class="tracker-link-remove" onclick="event.stopPropagation();removeTrackerLink('${l.id}')" title="Remove">×</button>
+  `).join('') + `<button class="tracker-add-btn" onclick="openAddLinkModal()">+ add</button>`
+}
+
+function openAddLinkModal() {
+  document.getElementById('link-name-input').value = ''
+  document.getElementById('link-url-input').value = ''
+  openModal('modal-add-link')
+  setTimeout(() => document.getElementById('link-name-input').focus(), 50)
+}
+
+function saveTrackerLink() {
+  const name = document.getElementById('link-name-input').value.trim()
+  const url = document.getElementById('link-url-input').value.trim()
+  if (!name || !url) { toast('Both fields are required'); return }
+  const fullUrl = url.startsWith('http') ? url : 'https://' + url
+  Links.add(name, fullUrl)
+  closeModal('modal-add-link')
+  renderTrackerLinks()
+}
+
+function removeTrackerLink(id) {
+  Links.remove(id)
+  renderTrackerLinks()
+}
+
 // ── Dashboard ─────────────────────────────────────────────────────────────
 function showDashboard() {
   document.getElementById('view-dashboard').classList.add('active')
   document.getElementById('view-job').classList.remove('active')
   currentJobId = null
   document.getElementById('topbar-crumb').textContent = ''
+  renderTrackerLinks()
   renderDashboard()
 }
 

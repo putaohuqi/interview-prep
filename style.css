@@ -245,6 +245,92 @@ body {
   border: 1px solid var(--lavender);
 }
 
+/* ── Tracker Links ── */
+.tracker-section {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0 28px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.tracker-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+
+.tracker-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.tracker-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s;
+  box-shadow: var(--shadow);
+}
+
+.tracker-link:hover {
+  border-color: var(--accent);
+  color: var(--accent-dark);
+  background: var(--accent-bg);
+  box-shadow: var(--shadow-md);
+}
+
+.tracker-link-icon { font-size: 12px; }
+.tracker-link-arrow { font-size: 11px; opacity: 0.5; }
+
+.tracker-link-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-faint);
+  font-size: 15px;
+  line-height: 1;
+  padding: 0 2px;
+  margin-left: -4px;
+  transition: color 0.15s;
+}
+
+.tracker-link-remove:hover { color: var(--danger); }
+
+.tracker-add-btn {
+  background: none;
+  border: 1.5px dashed var(--border-strong);
+  border-radius: var(--radius-pill);
+  color: var(--text-faint);
+  font-size: 12px;
+  font-family: var(--font);
+  font-style: italic;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tracker-add-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent-dark);
+  background: var(--accent-bg);
+}
+
 .tag-filter-bar {
   max-width: 980px;
   margin: 0 auto;

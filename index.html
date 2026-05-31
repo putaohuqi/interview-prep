@@ -34,6 +34,10 @@
     </div>
     <button class="btn btn-primary" onclick="openAddJobModal()">+ Add Job</button>
   </div>
+  <div class="tracker-section">
+    <div class="tracker-label">application trackers</div>
+    <div class="tracker-links" id="tracker-links"></div>
+  </div>
   <div class="tag-filter-bar" id="tag-filter-bar" style="display:none"></div>
   <div class="jobs-grid" id="jobs-grid"></div>
 </div>
@@ -74,6 +78,30 @@
       <div class="prep-body" id="prep-body"></div>
     </main>
 
+  </div>
+</div>
+
+<!-- ── Modal: Add Tracker Link ─────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-add-link">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-header">
+      <h2>Add Tracker Link</h2>
+      <button class="modal-close" onclick="closeModal('modal-add-link')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="link-name-input">Name</label>
+        <input type="text" id="link-name-input" placeholder="e.g. Fall 2026, Winter 2025…" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label for="link-url-input">Link</label>
+        <input type="url" id="link-url-input" placeholder="Paste your Google Sheets, Notion, or Airtable link…" autocomplete="off">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-link')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveTrackerLink()">Save</button>
+    </div>
   </div>
 </div>
 
