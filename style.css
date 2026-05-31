@@ -193,6 +193,107 @@ body {
   margin-top: 8px;
 }
 
+.job-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.job-doc-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.doc-pill {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-bg);
+  color: var(--accent-dark);
+  border: 1px solid var(--border-strong);
+}
+
+/* ── Tags ── */
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 9px;
+  border-radius: var(--radius-pill);
+  background: var(--lavender-bg);
+  color: #6870c0;
+  border: 1px solid var(--lavender);
+}
+
+.tag-chip-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--lavender-bg);
+  color: #6870c0;
+  border: 1px solid var(--lavender);
+}
+
+.tag-filter-bar {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0 28px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.tag-input-wrap {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  background: white;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  transition: border-color 0.2s;
+  cursor: text;
+}
+
+.tag-input-wrap:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(122,168,216,0.12);
+}
+
+.tag-input-wrap input {
+  border: none;
+  background: transparent;
+  padding: 2px 4px;
+  font-size: 13px;
+  outline: none;
+  flex: 1;
+  min-width: 120px;
+  box-shadow: none;
+}
+
+.tag-input-wrap input:focus { border: none; box-shadow: none; }
+
+.prep-job-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 6px;
+  min-height: 4px;
+}
+
 .job-card-footer {
   display: flex;
   align-items: center;
@@ -847,6 +948,14 @@ select { cursor: pointer; }
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
   margin-top: 1px;
+}
+
+/* ── Expand Modal ── */
+.modal-expand {
+  max-width: 90vw;
+  width: 90vw;
+  height: 90vh;
+  max-height: 90vh;
 }
 
 /* ── Toast ── */

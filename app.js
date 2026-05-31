@@ -16,6 +16,7 @@ const DB = {
 // ── State ─────────────────────────────────────────────────────────────────
 let currentJobId = null
 let activeDocTab = 'jobPosting'
+let activeTagFilter = 'all'
 
 // ── Router ────────────────────────────────────────────────────────────────
 function navigate(hash) { window.location.hash = hash }
@@ -47,40 +48,64 @@ function showDashboard() {
   renderDashboard()
 }
 
+function getAllTags() {
+  const all = DB.getJobs().flatMap(j => j.tags || [])
+  return [...new Set(all)].sort()
+}
+
 function renderDashboard() {
   const jobs = DB.getJobs()
   const grid = document.getElementById('jobs-grid')
 
-  if (jobs.length === 0) {
+  // Render tag filters
+  const allTags = getAllTags()
+  const tagBar = document.getElementById('tag-filter-bar')
+  if (allTags.length > 0) {
+    tagBar.style.display = 'flex'
+    tagBar.innerHTML =
+      `<button class="filter-chip ${activeTagFilter === 'all' ? 'active' : ''}" onclick="setTagFilter('all')">All</button>` +
+      allTags.map(t => `<button class="filter-chip ${activeTagFilter === t ? 'active' : ''}" onclick="setTagFilter('${esc(t)}')">${esc(t)}</button>`).join('')
+  } else {
+    tagBar.style.display = 'none'
+  }
+
+  const filtered = activeTagFilter === 'all' ? jobs : jobs.filter(j => (j.tags || []).includes(activeTagFilter))
+
+  if (filtered.length === 0) {
     grid.innerHTML = `<div class="empty-state">
       <div class="empty-icon">🌸</div>
-      <h3>nothing here yet</h3>
-      <p>add your first job to get started ✦</p>
-      <button class="btn btn-primary" onclick="openAddJobModal()">+ add job</button>
+      <h3>${jobs.length === 0 ? 'nothing here yet' : 'no jobs with this tag'}</h3>
+      <p>${jobs.length === 0 ? 'add your first job to get started ✦' : 'try a different tag or add a new job'}</p>
+      ${jobs.length === 0 ? `<button class="btn btn-primary" onclick="openAddJobModal()">+ add job</button>` : ''}
     </div>`
     return
   }
 
-  grid.innerHTML = jobs.map(j => {
+  grid.innerHTML = filtered.map(j => {
     const docs = j.documents || {}
-    const hasJob = !!(docs.jobPosting?.content || docs.jobPosting?.fileData)
-    const hasResume = !!(docs.resume?.content || docs.resume?.fileData)
-    const hasCover = !!(docs.coverLetter?.content || docs.coverLetter?.fileData)
+    const docPills = [
+      { key: 'jobPosting', label: 'job post' },
+      { key: 'resume', label: 'resume' },
+      { key: 'coverLetter', label: 'cover' }
+    ].filter(d => docs[d.key]?.content || docs[d.key]?.fileData)
+     .map(d => `<span class="doc-pill">${d.label}</span>`).join('')
+
     const qCount = (j.prepSections || []).reduce((n, s) => n + (s.cards?.length || 0), 0)
+    const tags = (j.tags || []).map(t => `<span class="tag-chip">${esc(t)}</span>`).join('')
 
     return `<div class="job-card" onclick="navigate('/job/${j.id}')">
       <div class="job-company">${esc(j.company)}</div>
       <div class="job-role">${esc(j.role)}</div>
+      ${tags ? `<div class="job-tags">${tags}</div>` : ''}
       ${qCount > 0 ? `<div class="job-prep-count">📝 ${qCount} prep question${qCount !== 1 ? 's' : ''}</div>` : ''}
-      <div class="job-card-footer">
-        <div class="job-docs" title="Job posting · Resume · Cover letter">
-          <div class="doc-dot ${hasJob ? 'filled' : ''}" title="Job posting"></div>
-          <div class="doc-dot ${hasResume ? 'filled' : ''}" title="Resume"></div>
-          <div class="doc-dot ${hasCover ? 'filled' : ''}" title="Cover letter"></div>
-        </div>
-      </div>
+      ${docPills ? `<div class="job-doc-pills">${docPills}</div>` : ''}
     </div>`
   }).join('')
+}
+
+function setTagFilter(tag) {
+  activeTagFilter = tag
+  renderDashboard()
 }
 
 // ── Job Detail ────────────────────────────────────────────────────────────
@@ -97,6 +122,10 @@ function showJobDetail(id) {
   document.getElementById('prep-job-company').textContent = job.company
   document.getElementById('prep-job-role').textContent = job.role
 
+  // Show tags in header
+  const tagsEl = document.getElementById('prep-job-tags')
+  tagsEl.innerHTML = (job.tags || []).map(t => `<span class="tag-chip">${esc(t)}</span>`).join('')
+
   renderDocSidebar(job)
   renderPrepSections(job)
 }
@@ -112,7 +141,7 @@ function renderDocSidebar(job) {
     if (has && !dot) tab.insertAdjacentHTML('beforeend', '<span class="tab-dot"></span>')
     if (!has && dot) dot.remove()
   })
-  switchDocTab(activeDocTab, false)
+  switchDocTab(activeDocTab)
 }
 
 function switchDocTab(tabKey) {
@@ -140,7 +169,10 @@ function renderDocPanel(tabKey) {
             <span class="file-icon">${isText ? '📄' : '📕'}</span>
             <span>${esc(doc.fileName || 'File')}</span>
           </div>
-          <button class="btn btn-ghost btn-sm" onclick="removeDoc('${tabKey}')">Remove</button>
+          <div style="display:flex;gap:4px;align-items:center">
+            ${!isText ? `<button class="btn btn-ghost btn-sm" onclick="expandDoc('${tabKey}')" title="Expand">⤢ expand</button>` : ''}
+            <button class="btn btn-ghost btn-sm" onclick="removeDoc('${tabKey}')">Remove</button>
+          </div>
         </div>
         ${isText
           ? `<div class="file-text-content">${esc(doc.content)}</div>`
@@ -173,6 +205,23 @@ function renderDocPanel(tabKey) {
         <button class="btn btn-primary btn-sm" onclick="saveDocText('${tabKey}')">Save text</button>
       </div>`
   }
+}
+
+// ── PDF Expand ────────────────────────────────────────────────────────────
+function expandDoc(tabKey) {
+  const job = DB.getJob(currentJobId)
+  const doc = (job?.documents || {})[tabKey] || {}
+  if (!doc.fileData) return
+
+  const overlay = document.getElementById('modal-expand')
+  document.getElementById('expand-iframe').src = doc.fileData
+  document.getElementById('expand-filename').textContent = doc.fileName || 'Document'
+  overlay.classList.add('open')
+}
+
+function closeExpandModal() {
+  document.getElementById('modal-expand').classList.remove('open')
+  document.getElementById('expand-iframe').src = ''
 }
 
 function triggerFileUpload(tabKey) { document.getElementById(`file-input-${tabKey}`)?.click() }
@@ -434,6 +483,7 @@ function openAddJobModal() {
   editingJobId = null
   document.getElementById('modal-job-title').textContent = 'Add Job'
   document.getElementById('job-form').reset()
+  document.getElementById('tags-preview').innerHTML = ''
   openModal('modal-job')
 }
 
@@ -444,7 +494,36 @@ function openEditJobModal() {
   document.getElementById('job-company').value = job.company || ''
   document.getElementById('job-role').value = job.role || ''
   document.getElementById('job-notes').value = job.notes || ''
+  // Render existing tags
+  const preview = document.getElementById('tags-preview')
+  preview.innerHTML = ''
+  ;(job.tags || []).forEach(t => addTagChipToPreview(t))
   openModal('modal-job')
+}
+
+// ── Tag input logic ───────────────────────────────────────────────────────
+function handleTagKeydown(e) {
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault()
+    const val = e.target.value.trim().replace(/,$/, '')
+    if (val) { addTagChipToPreview(val); e.target.value = '' }
+  }
+}
+
+function addTagChipToPreview(tag) {
+  const preview = document.getElementById('tags-preview')
+  // Don't add duplicates
+  const existing = [...preview.querySelectorAll('.tag-chip-edit')].map(el => el.dataset.tag)
+  if (existing.includes(tag)) return
+  const chip = document.createElement('span')
+  chip.className = 'tag-chip-edit'
+  chip.dataset.tag = tag
+  chip.innerHTML = `${esc(tag)} <button type="button" onclick="this.parentElement.remove()" style="background:none;border:none;cursor:pointer;font-size:12px;color:inherit;padding:0;margin-left:2px">×</button>`
+  preview.appendChild(chip)
+}
+
+function getTagsFromPreview() {
+  return [...document.querySelectorAll('#tags-preview .tag-chip-edit')].map(el => el.dataset.tag)
 }
 
 function saveJob() {
@@ -452,10 +531,15 @@ function saveJob() {
   const role = document.getElementById('job-role').value.trim()
   if (!company || !role) { toast('Company and role are required'); return }
 
+  // Also capture any unsubmitted tag input
+  const tagInput = document.getElementById('job-tags-input')
+  if (tagInput.value.trim()) { addTagChipToPreview(tagInput.value.trim()); tagInput.value = '' }
+
   const job = editingJobId ? DB.getJob(editingJobId) : { id: DB.newId(), documents: {}, prepSections: [] }
   job.company = company
   job.role = role
   job.notes = document.getElementById('job-notes').value.trim()
+  job.tags = getTagsFromPreview()
 
   DB.saveJob(job)
   closeModal('modal-job')

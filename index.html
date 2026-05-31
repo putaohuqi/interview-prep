@@ -34,6 +34,7 @@
     </div>
     <button class="btn btn-primary" onclick="openAddJobModal()">+ Add Job</button>
   </div>
+  <div class="tag-filter-bar" id="tag-filter-bar" style="display:none"></div>
   <div class="jobs-grid" id="jobs-grid"></div>
 </div>
 
@@ -64,6 +65,7 @@
         <div class="prep-job-info">
           <div class="prep-job-company" id="prep-job-company"></div>
           <h2 id="prep-job-role"></h2>
+          <div class="prep-job-tags" id="prep-job-tags"></div>
         </div>
         <div class="prep-actions">
           <button class="btn btn-secondary btn-sm" onclick="openAddSectionModal()">+ Add Section</button>
@@ -87,16 +89,24 @@
         <div class="form-row">
           <div class="form-group">
             <label for="job-company">Company *</label>
-            <input type="text" id="job-company" placeholder="e.g. Stripe" required autocomplete="off">
+            <input type="text" id="job-company" placeholder="e.g. Manulife" required autocomplete="off">
           </div>
           <div class="form-group">
             <label for="job-role">Role *</label>
-            <input type="text" id="job-role" placeholder="e.g. Software Engineer" required autocomplete="off">
+            <input type="text" id="job-role" placeholder="e.g. Accounting & Finance Intern" required autocomplete="off">
           </div>
         </div>
         <div class="form-group">
+          <label for="job-tags-input">Tags</label>
+          <div class="tag-input-wrap">
+            <div class="tags-preview" id="tags-preview"></div>
+            <input type="text" id="job-tags-input" placeholder="e.g. Fall 2026 — press Enter to add" autocomplete="off" onkeydown="handleTagKeydown(event)">
+          </div>
+          <div style="font-size:11px;color:var(--text-faint);margin-top:5px;font-style:italic">Press Enter or comma after each tag. Use these to group jobs by season, year, or whatever makes sense to you.</div>
+        </div>
+        <div class="form-group">
           <label for="job-notes">Notes</label>
-          <textarea id="job-notes" rows="3" placeholder="Recruiter name, referral, anything to remember…"></textarea>
+          <textarea id="job-notes" rows="2" placeholder="Recruiter name, referral, anything to remember…"></textarea>
         </div>
       </form>
     </div>
@@ -185,6 +195,22 @@
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('modal-confirm')">Cancel</button>
       <button class="btn btn-danger" onclick="executePendingDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Expand Document ─────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-expand" onclick="if(event.target===this)closeExpandModal()">
+  <div class="modal modal-expand">
+    <div class="modal-header">
+      <div class="file-preview-name">
+        <span class="file-icon">📕</span>
+        <span id="expand-filename"></span>
+      </div>
+      <button class="modal-close" onclick="closeExpandModal()">×</button>
+    </div>
+    <div style="flex:1;overflow:hidden;">
+      <iframe id="expand-iframe" style="width:100%;height:100%;border:none;display:block;" title="Document preview"></iframe>
     </div>
   </div>
 </div>
