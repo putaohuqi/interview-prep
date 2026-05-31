@@ -278,13 +278,43 @@ function removeDoc(tabKey) {
 }
 
 // ── Prep Sections ─────────────────────────────────────────────────────────
-function renderPrepSections(job) {
+function getCollapseState() {
+  const state = {}
+  document.querySelectorAll('[id^="body-"]').forEach(el => {
+    state[el.id] = el.classList.contains('open')
+  })
+  document.querySelectorAll('[id^="cbody-"]').forEach(el => {
+    state[el.id] = el.classList.contains('open')
+  })
+  return state
+}
+
+function restoreCollapseState(state) {
+  document.querySelectorAll('[id^="body-"]').forEach(el => {
+    if (el.id in state) {
+      el.classList.toggle('open', state[el.id])
+      const toggle = document.getElementById('toggle-' + el.id.replace('body-', ''))
+      if (toggle) toggle.classList.toggle('open', state[el.id])
+    }
+  })
+  document.querySelectorAll('[id^="cbody-"]').forEach(el => {
+    if (el.id in state) {
+      el.classList.toggle('open', state[el.id])
+      const toggle = document.getElementById('ctoggle-' + el.id.replace('cbody-', ''))
+      if (toggle) toggle.classList.toggle('open', state[el.id])
+    }
+  })
+}
+
+function renderPrepSections(job, collapseState) {
+  const state = collapseState || getCollapseState()
   const body = document.getElementById('prep-body')
   const sections = job.prepSections || []
   body.innerHTML = sections.map((sec, si) => renderSectionHTML(sec, si)).join('') +
     `<div class="prep-add-toolbar" onclick="openAddSectionModal()">
       <span style="font-size:18px">+</span> add a prep section
     </div>`
+  restoreCollapseState(state)
 }
 
 function renderSectionHTML(sec, si) {
