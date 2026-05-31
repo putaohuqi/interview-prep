@@ -311,6 +311,23 @@ function renderSectionHTML(sec, si) {
 }
 
 function renderCardHTML(card, ci, secId) {
+  const fields = [
+    { key: 'alsoPhrased', label: 'Also phrased as', placeholder: 'e.g. walk me through your background / give me your elevator pitch…' },
+    { key: 'keywords',    label: 'Keywords to listen for', placeholder: 'e.g. tell me about yourself, walk me through, introduce yourself…' },
+    { key: 'anchor',      label: 'Anchor / Strategy', placeholder: 'e.g. Present → Past → Future. Degree + goal → last co-op → why this company.' },
+    { key: 'direction',   label: 'Direction / Answer', placeholder: 'Write your answer direction here. Not a script — just the key beats you want to hit.' },
+    { key: 'notes',       label: 'Notes & Warnings', placeholder: 'e.g. Say this out loud 5x before the interview. 90 seconds max.' },
+  ]
+
+  const fieldHTML = fields.map(f => `
+    <div class="qa-field">
+      <div class="qa-field-label">${f.label}</div>
+      <textarea class="qa-notes ${f.key === 'direction' ? 'qa-notes-lg' : ''}"
+        placeholder="${f.placeholder}"
+        onchange="saveCardField('${secId}','${card.id}','${f.key}',this.value)"
+        onblur="saveCardField('${secId}','${card.id}','${f.key}',this.value)">${esc(card[f.key] || '')}</textarea>
+    </div>`).join('')
+
   return `<div class="qa-card" id="card-${card.id}">
     <div class="qa-card-header" onclick="toggleCard('${card.id}')">
       <div class="qa-num">${ci + 1}</div>
@@ -318,10 +335,7 @@ function renderCardHTML(card, ci, secId) {
       <span class="qa-card-toggle open" id="ctoggle-${card.id}">▶</span>
     </div>
     <div class="qa-card-body open" id="cbody-${card.id}">
-      <div class="qa-notes-label">My Notes / Answer</div>
-      <textarea class="qa-notes" placeholder="Add your answer, key words, talking points…"
-        onchange="saveCardNote('${secId}','${card.id}',this.value)"
-        onblur="saveCardNote('${secId}','${card.id}',this.value)">${esc(card.answer || '')}</textarea>
+      ${fieldHTML}
       <div class="qa-card-footer">
         <button class="btn btn-ghost btn-sm" onclick="confirmDeleteCard('${secId}','${card.id}')">Remove</button>
       </div>
@@ -339,11 +353,11 @@ function toggleCard(cardId) {
   document.getElementById(`ctoggle-${cardId}`)?.classList.toggle('open')
 }
 
-function saveCardNote(secId, cardId, value) {
+function saveCardField(secId, cardId, field, value) {
   const job = DB.getJob(currentJobId); if (!job) return
   const card = (job.prepSections || []).find(s => s.id === secId)?.cards?.find(c => c.id === cardId)
   if (!card) return
-  card.answer = value
+  card[field] = value
   DB.saveJob(job)
 }
 
